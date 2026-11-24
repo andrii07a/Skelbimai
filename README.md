@@ -72,8 +72,8 @@ Sign in with the username or the email (`lina@turgus.test`, …).
 
 **3. As `administrator`**
 - **Categories**: add one; a category that still has listings cannot be removed.
-- **Members**: suspend `tomas` → his session ends, he cannot sign in, his listings vanish from the
-  marketplace. *Lift suspension* brings everything back.
+- **Members**: suspend `tomas` → that session ends, the account cannot sign in, and its listings
+  vanish from the marketplace. *Lift suspension* brings everything back.
 - **Review listings / Review comments**: hide and show again.
 
 ## ✅ Assignment checklist

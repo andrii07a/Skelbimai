@@ -10,6 +10,7 @@ const flash = require('./middleware/flash');
 const adminAuthRoutes = require('./routes/adminAuth');
 const adminDashboardRoutes = require('./routes/adminDashboard');
 const adminAdsRoutes = require('./routes/adminAds');
+const adminModerationRoutes = require('./routes/adminModeration');
 
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -20,6 +21,10 @@ app.set('views', path.join(__dirname, 'views'));
 // Read form data (admin pages) and JSON (React → API)
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+app.use((req, res, next) => {
+  req.body = req.body ?? {}; // Express 5 leaves req.body undefined for requests without a body
+  next();
+});
 
 // Login is remembered with a session cookie
 app.use(
@@ -41,7 +46,8 @@ app.use('/admin', flash);
 app.use('/admin', adminAuthRoutes); // /admin/login, /admin/register, /admin/logout (no login needed)
 app.use('/admin', requireLogin); // everything below needs a logged-in user
 app.use('/admin', adminDashboardRoutes);
-app.use('/admin', adminAdsRoutes); // my ads
+app.use('/admin', adminAdsRoutes); // my ads, comments under them, saved ads
+app.use('/admin', adminModerationRoutes); // admin only: categories, users, blocking
 
 app.get('/', (req, res) => {
   res.send('Classifieds server is running. Admin area: <a href="/admin">/admin</a>');

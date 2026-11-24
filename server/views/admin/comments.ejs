@@ -1,0 +1,25 @@
+<%- include('../partials/header') %>
+<h1 class="h3 mb-1">All comments</h1>
+<p class="text-muted">A blocked comment is hidden from the public site.</p>
+
+<% if (comments.length === 0) { %>
+  <div class="alert alert-info">There are no comments yet.</div>
+<% } else { %>
+  <ul class="list-group shadow-sm">
+    <% for (const c of comments) { %>
+      <li class="list-group-item d-flex justify-content-between align-items-start gap-3 <%= c.is_blocked ? 'list-group-item-danger' : '' %>">
+        <div>
+          <div class="small text-muted">
+            <strong><%= c.author %></strong> on <em><%= c.ad_title %></em> · <%= c.created_at %>
+            <% if (c.is_blocked) { %><span class="badge text-bg-danger">blocked</span><% } %>
+          </div>
+          <div style="white-space: pre-wrap;"><%= c.text %></div>
+        </div>
+        <form method="post" action="/admin/moderation/comments/<%= c.id %>/toggle-block" class="m-0">
+          <button class="btn btn-sm <%= c.is_blocked ? 'btn-success' : 'btn-outline-danger' %>"><%= c.is_blocked ? 'Unblock' : 'Block' %></button>
+        </form>
+      </li>
+    <% } %>
+  </ul>
+<% } %>
+<%- include('../partials/footer') %>

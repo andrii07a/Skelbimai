@@ -1,0 +1,34 @@
+<%- include('../partials/header') %>
+<h1 class="h3 mb-1">All ads</h1>
+<p class="text-muted">Block inappropriate ads. A blocked ad disappears from the public site, but its owner still sees it.</p>
+
+<div class="table-responsive bg-white rounded shadow-sm">
+  <table class="table mb-0">
+    <thead class="table-light">
+      <tr><th>Photo</th><th>Title</th><th>Category</th><th>Owner</th><th class="text-end">Price</th><th>Status</th><th class="text-end">Actions</th></tr>
+    </thead>
+    <tbody>
+      <% for (const ad of ads) { %>
+        <tr class="<%= ad.is_blocked ? 'table-danger' : '' %>">
+          <td><img class="ad-thumb" src="/uploads/<%= ad.image %>" alt=""></td>
+          <td><%= ad.title %></td>
+          <td><%= ad.category_name %></td>
+          <td>
+            <%= ad.owner %>
+            <% if (ad.owner_blocked) { %><span class="badge text-bg-secondary" title="Hidden because the owner is blocked">owner blocked</span><% } %>
+          </td>
+          <td class="text-end text-nowrap"><%= ad.price.toFixed(2) %> €</td>
+          <td><%= ad.is_blocked ? 'Blocked' : 'Visible' %></td>
+          <td class="text-end">
+            <form method="post" action="/admin/moderation/ads/<%= ad.id %>/toggle-block" class="m-0">
+              <button class="btn btn-sm <%= ad.is_blocked ? 'btn-success' : 'btn-outline-danger' %>">
+                <%= ad.is_blocked ? 'Unblock' : 'Block' %>
+              </button>
+            </form>
+          </td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+<%- include('../partials/footer') %>

@@ -1,5 +1,6 @@
 // Admin area for every logged-in user: create, edit and delete OWN ads.
 const express = require('express');
+const db = require('../db/database');
 const ads = require('../services/adService');
 const { uploadImage, deleteImage, MAX_SIZE_MB } = require('../middleware/upload');
 
@@ -83,6 +84,60 @@ router.post('/ads/:id/delete', loadOwnAd, (req, res) => {
   deleteImage(req.ad.image);
   req.flash('success', `The ad "${req.ad.title}" was deleted.`);
   res.redirect('/admin/ads');
+});
+
+// Comments under my ad: the owner can delete inappropriate ones
+router.get('/ads/:id/comments', loadOwnAd, (req, res) => {
+  const comments = db
+    .prepare(
+      `SELECT c.*, u.username
+         FROM comments c JOIN users u ON u.id = c.user_id
+        WHERE c.ad_id = ?
+        ORDER BY c.created_at DESC, c.id DESC`
+    )
+    .all(req.ad.id);
+  res.render('ads/comments', { title: 'Comments', ad: req.ad, comments });
+});
+
+// Delete a comment: allowed for the owner of the ad (and for the administrator)
+router.post('/comments/:id/delete', (req, res) => {
+  const comment = db
+    .prepare('SELECT c.id, c.ad_id, a.user_id AS ad_owner_id FROM comments c JOIN ads a ON a.id = c.ad_id WHERE c.id = ?')
+    .get(Number(req.params.id));
+  if (!comment) {
+    return res.status(404).render('error', { title: 'Not found', message: 'This comment does not exist.' });
+  }
+  if (comment.ad_owner_id !== req.user.id && req.user.role !== 'admin') {
+    return res
+      .status(403)
+      .render('error', { title: 'Access denied', message: 'You can delete comments only under your own ads.' });
+  }
+  db.prepare('DELETE FROM comments WHERE id = ?').run(comment.id);
+  req.flash('success', 'The comment was deleted.');
+  const back = String(req.body.back || '');
+  res.redirect(back.startsWith('/admin/') ? back : `/admin/ads/${comment.ad_id}/comments`);
+});
+
+// My saved (⭐) ads
+router.get('/favorites', (req, res) => {
+  const favorites = db
+    .prepare(
+      `SELECT a.*, c.name AS category_name, u.username AS owner, u.is_blocked AS owner_blocked
+         FROM favorites f
+         JOIN ads a        ON a.id = f.ad_id
+         JOIN categories c ON c.id = a.category_id
+         JOIN users u      ON u.id = a.user_id
+        WHERE f.user_id = ?
+        ORDER BY f.created_at DESC`
+    )
+    .all(req.user.id);
+  res.render('favorites', { title: 'Saved ads', favorites });
+});
+
+router.post('/favorites/:adId/delete', (req, res) => {
+  db.prepare('DELETE FROM favorites WHERE user_id = ? AND ad_id = ?').run(req.user.id, Number(req.params.adId));
+  req.flash('success', 'Removed from saved ads.');
+  res.redirect('/admin/favorites');
 });
 
 module.exports = router;

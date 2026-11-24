@@ -41,7 +41,7 @@ router.get('/categories', (req, res) => {
 });
 
 // ---------- Ads: search by category and word / phrase ----------
-// GET /api/ads?category=2&q=bike
+// GET /api/ads?category=2&q=bike&sort=price_asc   (sort: newest | price_asc | price_desc)
 router.get('/ads', (req, res) => {
   let sql = AD_SELECT;
   const params = [currentUserId(req)];
@@ -60,7 +60,13 @@ router.get('/ads', (req, res) => {
     params.push(pattern, pattern);
   }
 
-  sql += ' ORDER BY a.created_at DESC, a.id DESC';
+  // Sorting: only these values are allowed (never put user text straight into SQL)
+  const SORTS = {
+    newest: 'a.created_at DESC, a.id DESC',
+    price_asc: 'a.price ASC, a.id DESC',
+    price_desc: 'a.price DESC, a.id DESC',
+  };
+  sql += ' ORDER BY ' + (SORTS[req.query.sort] || SORTS.newest);
   res.json(db.prepare(sql).all(...params).map(toAd));
 });
 

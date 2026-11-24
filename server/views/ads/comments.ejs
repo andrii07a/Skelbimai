@@ -1,7 +1,7 @@
 <%- include('../partials/header') %>
 <a class="small" href="/admin/ads">← My ads</a>
 <h1 class="h3 mt-2 mb-1">Comments</h1>
-<p class="text-muted">Under your ad <a href="/ads/<%= ad.id %>" target="_blank"><%= ad.title %></a>. Delete comments that are inappropriate.</p>
+<p class="text-muted">Under your ad <a href="/item/<%= ad.id %>" target="_blank"><%= ad.title %></a>. Delete comments that are inappropriate.</p>
 
 <% if (comments.length === 0) { %>
   <div class="alert alert-info">There are no comments under this ad yet.</div>

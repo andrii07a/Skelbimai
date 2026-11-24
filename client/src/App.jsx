@@ -1,29 +1,27 @@
 import { Route, Routes } from 'react-router';
-import NavBar from './components/NavBar.jsx';
-import HomePage from './pages/HomePage.jsx';
-import AdPage from './pages/AdPage.jsx';
-import FavoritesPage from './pages/FavoritesPage.jsx';
-import LoginPage from './pages/LoginPage.jsx';
-import RegisterPage from './pages/RegisterPage.jsx';
-import NotFoundPage from './pages/NotFoundPage.jsx';
+import SiteHeader from './components/layout/SiteHeader.jsx';
+import SiteFooter from './components/layout/SiteFooter.jsx';
+import BrowsePage from './pages/BrowsePage.jsx';
+import ListingPage from './pages/ListingPage.jsx';
+import SavedPage from './pages/SavedPage.jsx';
+import AuthPage from './pages/AuthPage.jsx';
+import MissingPage from './pages/MissingPage.jsx';
 
 export default function App() {
   return (
-    <>
-      <NavBar />
-      <main className="container py-4">
+    <div className="site">
+      <SiteHeader />
+      <div className="site-content">
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/ads/:id" element={<AdPage />} />
-          <Route path="/favorites" element={<FavoritesPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="*" element={<NotFoundPage />} />
+          <Route path="/" element={<BrowsePage />} />
+          <Route path="/item/:id" element={<ListingPage />} />
+          <Route path="/saved" element={<SavedPage />} />
+          <Route path="/sign-in" element={<AuthPage mode="sign-in" />} />
+          <Route path="/join" element={<AuthPage mode="join" />} />
+          <Route path="*" element={<MissingPage />} />
         </Routes>
-      </main>
-      <footer className="container pb-4 text-center text-muted small">
-        Classifieds · school project · <a href="/admin">Admin area</a>
-      </footer>
-    </>
+      </div>
+      <SiteFooter />
+    </div>
   );
 }

@@ -18,7 +18,7 @@
               <% if (ad.is_blocked || ad.owner_blocked) { %>
                 <%= ad.title %> <span class="badge text-bg-secondary">no longer available</span>
               <% } else { %>
-                <a href="/ads/<%= ad.id %>" target="_blank"><%= ad.title %></a>
+                <a href="/item/<%= ad.id %>" target="_blank"><%= ad.title %></a>
               <% } %>
             </td>
             <td><%= ad.category_name %></td>

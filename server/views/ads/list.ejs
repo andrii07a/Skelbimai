@@ -16,7 +16,7 @@
         <% for (const ad of ads) { %>
           <tr>
             <td><img class="ad-thumb" src="/uploads/<%= ad.image %>" alt=""></td>
-            <td><a href="/ads/<%= ad.id %>" target="_blank"><%= ad.title %></a></td>
+            <td><a href="/item/<%= ad.id %>" target="_blank"><%= ad.title %></a></td>
             <td><%= ad.category_name %></td>
             <td class="text-end text-nowrap"><%= ad.price.toFixed(2) %> €</td>
             <td>

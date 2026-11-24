@@ -1,0 +1,43 @@
+<%- include('../partials/header') %>
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+  <h1 class="h3 m-0">My ads</h1>
+  <a class="btn btn-primary" href="/admin/ads/new">+ New ad</a>
+</div>
+
+<% if (ads.length === 0) { %>
+  <div class="alert alert-info">You have no ads yet. <a href="/admin/ads/new">Post your first ad</a>.</div>
+<% } else { %>
+  <div class="table-responsive bg-white rounded shadow-sm">
+    <table class="table table-hover mb-0">
+      <thead class="table-light">
+        <tr><th>Photo</th><th>Title</th><th>Category</th><th class="text-end">Price</th><th>Status</th><th class="text-end">Actions</th></tr>
+      </thead>
+      <tbody>
+        <% for (const ad of ads) { %>
+          <tr>
+            <td><img class="ad-thumb" src="/uploads/<%= ad.image %>" alt=""></td>
+            <td><a href="/ads/<%= ad.id %>" target="_blank"><%= ad.title %></a></td>
+            <td><%= ad.category_name %></td>
+            <td class="text-end text-nowrap"><%= ad.price.toFixed(2) %> €</td>
+            <td>
+              <% if (ad.is_blocked) { %>
+                <span class="badge text-bg-danger" title="Hidden from the public site">Blocked by admin</span>
+              <% } else { %>
+                <span class="badge text-bg-success">Visible</span>
+              <% } %>
+            </td>
+            <td class="text-end text-nowrap">
+              <a class="btn btn-sm btn-outline-secondary" href="/admin/ads/<%= ad.id %>/comments">💬 <%= ad.comment_count %></a>
+              <a class="btn btn-sm btn-outline-primary" href="/admin/ads/<%= ad.id %>/edit">Edit</a>
+              <form class="d-inline" method="post" action="/admin/ads/<%= ad.id %>/delete"
+                    onsubmit="return confirm('Delete this ad? This cannot be undone.')">
+                <button class="btn btn-sm btn-outline-danger">Delete</button>
+              </form>
+            </td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+<% } %>
+<%- include('../partials/footer') %>

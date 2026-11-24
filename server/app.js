@@ -9,6 +9,7 @@ const { loadUser, requireLogin } = require('./middleware/auth');
 const flash = require('./middleware/flash');
 const adminAuthRoutes = require('./routes/adminAuth');
 const adminDashboardRoutes = require('./routes/adminDashboard');
+const adminAdsRoutes = require('./routes/adminAds');
 
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -40,6 +41,7 @@ app.use('/admin', flash);
 app.use('/admin', adminAuthRoutes); // /admin/login, /admin/register, /admin/logout (no login needed)
 app.use('/admin', requireLogin); // everything below needs a logged-in user
 app.use('/admin', adminDashboardRoutes);
+app.use('/admin', adminAdsRoutes); // my ads
 
 app.get('/', (req, res) => {
   res.send('Classifieds server is running. Admin area: <a href="/admin">/admin</a>');

@@ -1,0 +1,49 @@
+<%- include('partials/header') %>
+<h1 class="h3 mb-4">Hello, <%= currentUser.username %>!</h1>
+
+<div class="row g-3 mb-4">
+  <div class="col-sm-4">
+    <a class="card text-decoration-none h-100" href="/admin/ads">
+      <div class="card-body"><div class="display-6"><%= stats.myAds %></div><div class="text-muted">My ads</div></div>
+    </a>
+  </div>
+  <div class="col-sm-4">
+    <a class="card text-decoration-none h-100" href="/admin/ads">
+      <div class="card-body"><div class="display-6"><%= stats.myComments %></div><div class="text-muted">Comments under my ads</div></div>
+    </a>
+  </div>
+  <div class="col-sm-4">
+    <a class="card text-decoration-none h-100" href="/admin/favorites">
+      <div class="card-body"><div class="display-6"><%= stats.favorites %></div><div class="text-muted">⭐ Saved ads</div></div>
+    </a>
+  </div>
+</div>
+
+<% if (currentUser.role === 'admin') { %>
+  <h2 class="h5 mb-3">Administrator</h2>
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <a class="card text-decoration-none h-100" href="/admin/users">
+        <div class="card-body"><div class="display-6"><%= stats.users %></div><div class="text-muted">Users</div></div>
+      </a>
+    </div>
+    <div class="col-6 col-md-3">
+      <a class="card text-decoration-none h-100" href="/admin/categories">
+        <div class="card-body"><div class="display-6"><%= stats.categories %></div><div class="text-muted">Categories</div></div>
+      </a>
+    </div>
+    <div class="col-6 col-md-3">
+      <a class="card text-decoration-none h-100" href="/admin/moderation/ads">
+        <div class="card-body"><div class="display-6"><%= stats.allAds %></div><div class="text-muted">All ads</div></div>
+      </a>
+    </div>
+    <div class="col-6 col-md-3">
+      <a class="card text-decoration-none h-100" href="/admin/moderation/ads">
+        <div class="card-body"><div class="display-6"><%= stats.blockedAds %></div><div class="text-muted">Blocked ads</div></div>
+      </a>
+    </div>
+  </div>
+<% } %>
+
+<a class="btn btn-primary" href="/admin/ads/new">+ Post a new ad</a>
+<%- include('partials/footer') %>

@@ -1,6 +1,14 @@
 // Opens the SQLite database (one file: server/data/app.db),
 // creates the tables if they do not exist and fills demo data when the database is empty.
 const fs = require('node:fs');
+
+// node:sqlite is built into Node.js 22.13 and newer
+const [major, minor] = process.versions.node.split('.').map(Number);
+if (major < 22 || (major === 22 && minor < 13)) {
+  console.error(`Node.js 22.13 or newer is required (you have ${process.version}). Download it from https://nodejs.org`);
+  process.exit(1);
+}
+
 const { DatabaseSync } = require('node:sqlite');
 const { DATA_DIR, DB_FILE, UPLOAD_DIR } = require('../paths');
 const seed = require('./seed');

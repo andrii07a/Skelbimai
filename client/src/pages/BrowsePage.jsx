@@ -1,9 +1,8 @@
 // Browse / search page. Filters live in the address (?category=2&q=bike&sort=price_asc),
 // so results change without reloading the page and the browser Back button works.
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router';
-import { endpoints, http } from '../lib/http.js';
-import { useDebouncedValue } from '../hooks/useDebouncedValue.js';
+import { api, http } from '../lib/http.js';
 import { useListings } from '../hooks/useListings.js';
 import { useStoredState } from '../hooks/useStoredState.js';
 import SearchHero from '../components/browse/SearchHero.jsx';
@@ -13,6 +12,8 @@ import ListingCollection from '../components/listing/ListingCollection.jsx';
 import EmptyState from '../components/ui/EmptyState.jsx';
 import Loader from '../components/ui/Loader.jsx';
 
+const SEARCH_DELAY_MS = 350;
+
 export default function BrowsePage() {
   const [params, setParams] = useSearchParams();
   const category = params.get('category') || '';
@@ -21,41 +22,59 @@ export default function BrowsePage() {
 
   const [categories, setCategories] = useState([]);
   const [typed, setTyped] = useState(q);
-  const debouncedTyped = useDebouncedValue(typed);
+  const searchTimer = useRef();
   const [view, setView] = useStoredState('turgus.view', 'grid');
   const { listings, setListings, status, error } = useListings({ category, q, sort });
 
   useEffect(() => {
-    http.get(endpoints.categories).then(setCategories).catch(() => setCategories([]));
+    http.get(api.categories).then(setCategories).catch(() => setCategories([]));
   }, []);
 
-  function applyFilters(changes) {
-    const next = new URLSearchParams(params);
-    Object.entries(changes).forEach(([key, value]) => (value ? next.set(key, value) : next.delete(key)));
-    if (next.get('sort') === 'newest') next.delete('sort');
-    setParams(next, { replace: true });
+  // Changes the filters in the address. The function form always works with the newest address.
+  const applyFilters = useCallback(
+    (changes) => {
+      setParams(
+        (current) => {
+          const next = new URLSearchParams(current);
+          Object.entries(changes).forEach(([key, value]) => (value ? next.set(key, value) : next.delete(key)));
+          if (next.get('sort') === 'newest') next.delete('sort');
+          return next;
+        },
+        { replace: true }
+      );
+    },
+    [setParams]
+  );
+
+  // Search while typing: wait until the visitor stops typing for a moment
+  function handleTyping(value) {
+    setTyped(value);
+    clearTimeout(searchTimer.current);
+    searchTimer.current = setTimeout(() => applyFilters({ q: value.trim() }), SEARCH_DELAY_MS);
   }
 
-  // Search while typing
-  useEffect(() => {
-    if (debouncedTyped.trim() !== q) applyFilters({ q: debouncedTyped.trim() });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedTyped]);
+  function searchNow() {
+    clearTimeout(searchTimer.current);
+    applyFilters({ q: typed.trim() });
+  }
 
-  // Back / forward in the browser changes the address: show the same text in the field
-  useEffect(() => setTyped(q), [q]);
+  useEffect(() => () => clearTimeout(searchTimer.current), []);
+
+  // Back / forward in the browser changes the address: show that text in the field
+  // (but do not touch what is being typed, e.g. a space at the end)
+  useEffect(() => setTyped((current) => (current.trim() === q ? current : q)), [q]);
 
   function updateSaved(listingId, saved) {
-    setListings((list) => list.map((item) => (item.id === listingId ? { ...item, is_favorite: saved } : item)));
+    setListings((list) => list.map((item) => (item.id === listingId ? { ...item, saved } : item)));
   }
 
-  const categoryName = categories.find((c) => String(c.id) === category)?.name;
+  const categoryName = categories.find((c) => String(c.id) === category)?.title;
   let heading = categoryName || 'Fresh ads';
   if (q) heading = categoryName ? `${categoryName}: “${q}”` : `Results for “${q}”`;
 
   return (
     <>
-      <SearchHero value={typed} onChange={setTyped} onSubmit={() => applyFilters({ q: typed.trim() })} />
+      <SearchHero value={typed} onChange={handleTyping} onSubmit={searchNow} />
 
       <div className="container py-4">
         <div className="browse-layout">

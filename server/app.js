@@ -1,94 +1,87 @@
-// Main Express application: admin area (EJS), REST API and the built React site, all on one port.
+// Turgus server: account/admin pages (EJS), REST API and the built React marketplace on ONE port.
 const fs = require('node:fs');
 const path = require('node:path');
 const express = require('express');
 const session = require('express-session');
 
-require('./db/database'); // creates tables + demo data on first start
+require('./db/database'); // creates the tables (and demo content) before anything else
 const { UPLOAD_DIR, CLIENT_DIST } = require('./paths');
-const { loadUser, requireLogin } = require('./middleware/auth');
-const flash = require('./middleware/flash');
-const adminAuthRoutes = require('./routes/adminAuth');
-const adminDashboardRoutes = require('./routes/adminDashboard');
-const adminAdsRoutes = require('./routes/adminAds');
-const adminModerationRoutes = require('./routes/adminModeration');
-const apiRoutes = require('./routes/api');
+const { attachMember, mustBeSignedIn } = require('./middleware/access');
+const notices = require('./middleware/notices');
 
-const PORT = process.env.PORT || 3000;
+const PORT = Number(process.env.PORT) || 3000;
 const app = express();
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+app.disable('x-powered-by');
 
-// Read form data (admin pages) and JSON (React → API)
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
+// ---- reading requests ----
+app.use(express.urlencoded({ extended: false })); // HTML forms
+app.use(express.json({ limit: '20kb' })); // React → API
 app.use((req, res, next) => {
-  req.body = req.body ?? {}; // Express 5 leaves req.body undefined for requests without a body
+  req.body ??= {}; // Express 5 leaves body undefined when nothing was sent
   next();
 });
 
-// Login is remembered with a session cookie
+// ---- who is signed in (cookie session) ----
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || 'school-project-secret-change-me',
+    name: 'turgus.sid',
+    secret: process.env.SESSION_SECRET || 'turgus-local-dev-secret',
     resave: false,
     saveUninitialized: false,
-    cookie: { httpOnly: true, sameSite: 'lax', maxAge: 7 * 24 * 60 * 60 * 1000 },
+    cookie: { httpOnly: true, sameSite: 'lax', maxAge: 1000 * 60 * 60 * 24 * 14 },
   })
 );
-app.use(loadUser);
+app.use(attachMember);
 
-// Static files: uploaded photos and Bootstrap for the admin pages
-app.use('/uploads', express.static(UPLOAD_DIR));
+// ---- files ----
+app.use('/uploads', express.static(UPLOAD_DIR, { maxAge: '1d' }));
 app.use('/vendor/bootstrap', express.static(path.join(__dirname, 'node_modules', 'bootstrap', 'dist')));
 app.use('/admin-assets', express.static(path.join(__dirname, 'public')));
 
-// REST API for the React site
-app.use('/api', apiRoutes);
+// ---- REST API ----
+app.use('/api', require('./routes/api'));
 
-// Admin area
-app.use('/admin', flash);
-app.use('/admin', adminAuthRoutes); // /admin/login, /admin/register, /admin/logout (no login needed)
-app.use('/admin', requireLogin); // everything below needs a logged-in user
-app.use('/admin', adminDashboardRoutes);
-app.use('/admin', adminAdsRoutes); // my ads, comments under them, saved ads
-app.use('/admin', adminModerationRoutes); // admin only: categories, users, blocking
-
-// 404 for admin pages
+// ---- account / admin area ----
+app.use('/admin', notices);
+app.use('/admin', require('./routes/account')); // sign in / join / sign out: open to everyone
+app.use('/admin', mustBeSignedIn); // the rest needs a member
+app.use('/admin', require('./routes/overview'));
+app.use('/admin', require('./routes/myListings'));
+app.use('/admin', require('./routes/moderation'));
 app.use('/admin', (req, res) => {
-  res.status(404).render('error', { title: 'Page not found', message: 'This admin page does not exist.' });
+  res.status(404).render('message', { title: 'Page not found', text: 'There is no such page in your account.' });
 });
 
-// Public React site (built into client/dist by "npm run setup")
-const clientIndex = path.join(CLIENT_DIST, 'index.html');
+// ---- React marketplace: real files first, then index.html for every other address ----
+const reactIndex = path.join(CLIENT_DIST, 'index.html');
 app.use(express.static(CLIENT_DIST));
 app.use((req, res, next) => {
   if (req.method !== 'GET' || req.path.startsWith('/uploads/')) return next();
-  // Every other address (/, /ads/5, /favorites...) is handled by React Router
-  if (!fs.existsSync(clientIndex)) {
+  if (!fs.existsSync(reactIndex)) {
     return res
       .status(503)
-      .send('The React site is not built yet. Run <code>npm run setup</code> in the project folder. Admin area: <a href="/admin">/admin</a>');
+      .type('html')
+      .send('<p>The marketplace is not built yet: run <code>npm run setup</code>.</p><p><a href="/admin">Account area</a></p>');
   }
-  res.sendFile(clientIndex);
+  res.sendFile(reactIndex);
 });
 
-// Error handler: JSON for the API, a page for the admin area
+// ---- errors: JSON for the API, a friendly page elsewhere ----
 app.use((err, req, res, next) => {
   const status = err.status || err.statusCode || 500;
   if (status >= 500) console.error(err);
-  const message = status >= 500 ? 'Something went wrong on the server.' : err.message;
-  if (req.originalUrl.startsWith('/api/')) {
-    return res.status(status).json({ error: message });
-  }
-  res.locals.flash = res.locals.flash || null;
-  res.locals.currentPath = res.locals.currentPath || req.path;
-  res.locals.currentUser = res.locals.currentUser || null;
-  res.status(status).render('error', { title: 'Error', message });
+  const text = status >= 500 ? 'Something broke on our side. Please try again.' : 'The request could not be read.';
+  if (req.originalUrl.startsWith('/api/')) return res.status(status).json({ error: text });
+  res.locals.member ??= null;
+  res.locals.notice ??= null;
+  res.locals.here ??= req.path;
+  res.status(status).render('message', { title: 'Something went wrong', text });
 });
 
 app.listen(PORT, () => {
   console.log(`Turgus marketplace: http://localhost:${PORT}`);
-  console.log(`Account / admin:    http://localhost:${PORT}/admin`);
+  console.log(`Account area:       http://localhost:${PORT}/admin`);
 });

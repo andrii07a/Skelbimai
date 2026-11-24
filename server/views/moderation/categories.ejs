@@ -1,0 +1,32 @@
+<%- include('../partials/top') %>
+<h1 class="h3 page-title mb-3">Categories</h1>
+
+<div class="row g-3">
+  <div class="col-lg-5 order-lg-2">
+    <form class="card card-body" method="post" action="/admin/categories" novalidate>
+      <label class="form-label fw-semibold" for="title">Add a category</label>
+      <input class="form-control<%= problem ? ' is-invalid' : '' %>" id="title" name="title" maxlength="40"
+             value="<%= typed %>" placeholder="e.g. Garden & Tools" required>
+      <% if (problem) { %><div class="invalid-feedback"><%= problem %></div><% } %>
+      <button class="btn btn-primary rounded-pill mt-3">Add category</button>
+      <p class="form-text mb-0 mt-2">A category can be removed only when no listing uses it.</p>
+    </form>
+  </div>
+
+  <div class="col-lg-7 order-lg-1">
+    <div class="card">
+      <ul class="list-group list-group-flush">
+        <% for (const c of categories) { %>
+          <li class="list-group-item d-flex align-items-center gap-3">
+            <span class="flex-grow-1 fw-semibold"><%= c.title %></span>
+            <span class="badge rounded-pill text-bg-light border"><%= c.used_by %> listing<%= c.used_by === 1 ? '' : 's' %></span>
+            <form method="post" action="/admin/categories/<%= c.id %>/delete" class="m-0">
+              <button class="btn btn-sm btn-outline-danger" <%= c.used_by ? 'disabled title="Still used by listings"' : '' %>>Remove</button>
+            </form>
+          </li>
+        <% } %>
+      </ul>
+    </div>
+  </div>
+</div>
+<%- include('../partials/bottom') %>

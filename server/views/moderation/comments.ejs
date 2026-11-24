@@ -1,0 +1,27 @@
+<%- include('../partials/top') %>
+<h1 class="h3 page-title mb-1">Review comments</h1>
+<p class="text-muted">Hidden comments stay in the database but are not shown on the marketplace.</p>
+
+<% if (comments.length === 0) { %>
+  <div class="card card-body text-center text-muted py-5">No comments have been written yet.</div>
+<% } else { %>
+  <div class="comment-stack">
+    <% for (const c of comments) { %>
+      <div class="comment-row<%= c.blocked_at ? ' is-blocked' : '' %>">
+        <span class="avatar avatar--small"><%= c.author.charAt(0).toUpperCase() %></span>
+        <div class="flex-grow-1 min-w-0">
+          <div class="small">
+            <strong><%= c.author %></strong>
+            <span class="text-muted">on <a href="/item/<%= c.listing_id %>" target="_blank"><%= c.listing_title %></a> · <%= c.posted_at.slice(0, 16) %></span>
+            <% if (c.blocked_at) { %><span class="status-pill status-pill--hidden ms-1">hidden</span><% } %>
+          </div>
+          <div class="pre-wrap"><%= c.body %></div>
+        </div>
+        <form method="post" action="/admin/moderation/comments/<%= c.id %>/block" class="m-0">
+          <button class="btn btn-sm rounded-pill <%= c.blocked_at ? 'btn-primary' : 'btn-outline-danger' %>"><%= c.blocked_at ? 'Show' : 'Hide' %></button>
+        </form>
+      </div>
+    <% } %>
+  </div>
+<% } %>
+<%- include('../partials/bottom') %>

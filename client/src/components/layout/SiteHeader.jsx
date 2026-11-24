@@ -64,7 +64,7 @@ export default function SiteHeader() {
               </>
             )}
             {/* The admin area is a separate server-rendered part, so a normal link is used */}
-            <a href="/admin/ads/new" className="btn btn-accent rounded-pill px-3">
+            <a href="/admin/listings/new" className="btn btn-accent rounded-pill px-3">
               + Sell something
             </a>
           </div>

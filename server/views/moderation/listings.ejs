@@ -1,0 +1,34 @@
+<%- include('../partials/top') %>
+<h1 class="h3 page-title mb-1">Review listings</h1>
+<p class="text-muted">Hide anything that breaks the rules. The seller still sees a hidden listing in their account; buyers do not.</p>
+
+<div class="listing-cards">
+  <% for (const row of rows) { %>
+    <article class="listing-card<%= row.blocked_at ? ' is-blocked' : '' %>">
+      <img src="/uploads/<%= row.photo %>" alt="" class="listing-card-photo">
+      <div class="listing-card-body">
+        <div class="d-flex justify-content-between gap-2">
+          <span class="listing-card-title"><%= row.title %></span>
+          <strong class="text-nowrap"><%= euro(row.price_cents) %> €</strong>
+        </div>
+        <div class="small text-muted mb-2">
+          <%= row.category_title %> · by <%= row.seller %>
+          <% if (row.seller_blocked_at) { %><span class="status-pill status-pill--hidden ms-1">seller suspended</span><% } %>
+        </div>
+        <% if (row.blocked_at) { %>
+          <div class="status-pill status-pill--hidden">Hidden since <%= row.blocked_at.slice(0, 10) %></div>
+        <% } else { %>
+          <div class="status-pill">Visible</div>
+        <% } %>
+        <div class="listing-card-actions">
+          <form method="post" action="/admin/moderation/listings/<%= row.id %>/block" class="m-0">
+            <button class="btn btn-sm rounded-pill <%= row.blocked_at ? 'btn-primary' : 'btn-outline-danger' %>">
+              <%= row.blocked_at ? 'Show again' : 'Hide listing' %>
+            </button>
+          </form>
+        </div>
+      </div>
+    </article>
+  <% } %>
+</div>
+<%- include('../partials/bottom') %>

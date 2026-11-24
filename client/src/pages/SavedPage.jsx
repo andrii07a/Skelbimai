@@ -1,7 +1,7 @@
 // ★ Saved ads of the signed-in user (stored in the database).
 import { useEffect, useState } from 'react';
 import { Link, Navigate } from 'react-router';
-import { endpoints, http } from '../lib/http.js';
+import { api, http } from '../lib/http.js';
 import { pluralize } from '../lib/format.js';
 import { useSession } from '../context/SessionContext.jsx';
 import ListingCollection from '../components/listing/ListingCollection.jsx';
@@ -16,7 +16,7 @@ export default function SavedPage() {
   useEffect(() => {
     if (!member) return;
     http
-      .get(endpoints.saved)
+      .get(api.saved)
       .then(setListings)
       .catch((err) => setProblem(err.message));
   }, [member]);

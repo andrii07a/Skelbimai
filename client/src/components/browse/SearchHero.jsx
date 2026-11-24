@@ -20,7 +20,7 @@ export default function SearchHero({ value, onChange, onSubmit }) {
           <input
             id="search"
             type="search"
-            placeholder="Search by word or phrase, e.g. “mountain bike”"
+            placeholder="Search by word or phrase, e.g. “camping tent”"
             value={value}
             onChange={(event) => onChange(event.target.value)}
             autoComplete="off"

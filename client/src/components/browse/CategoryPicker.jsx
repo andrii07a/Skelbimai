@@ -1,7 +1,7 @@
 // Categories: a vertical list on wide screens, scrollable chips on phones.
 export default function CategoryPicker({ categories, selected, onSelect }) {
-  const total = categories.reduce((sum, c) => sum + c.ad_count, 0);
-  const options = [{ id: '', name: 'Everything', ad_count: total }, ...categories];
+  const total = categories.reduce((sum, c) => sum + c.listingsTotal, 0);
+  const options = [{ id: '', title: 'Everything', listingsTotal: total }, ...categories];
 
   return (
     <nav aria-label="Categories">
@@ -17,8 +17,8 @@ export default function CategoryPicker({ categories, selected, onSelect }) {
                 aria-current={active ? 'true' : undefined}
                 onClick={() => onSelect(String(c.id))}
               >
-                <span>{c.name}</span>
-                <span className="category-count">{c.ad_count}</span>
+                <span>{c.title}</span>
+                <span className="category-count">{c.listingsTotal}</span>
               </button>
             </li>
           );

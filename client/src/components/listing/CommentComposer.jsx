@@ -1,7 +1,7 @@
 // Form for a new comment. Sends it to the API and gives the saved comment back to the page.
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router';
-import { endpoints, http } from '../../lib/http.js';
+import { api, http } from '../../lib/http.js';
 import { useSession } from '../../context/SessionContext.jsx';
 
 const MAX_LENGTH = 1000;
@@ -28,13 +28,13 @@ export default function CommentComposer({ listingId, onPosted }) {
   async function handleSubmit(event) {
     event.preventDefault();
     if (!text.trim()) {
-      setProblem('Write your question first.');
+      setProblem('Write something first.');
       return;
     }
     setProblem('');
     setSending(true);
     try {
-      const comment = await http.post(endpoints.comments(listingId), { text });
+      const comment = await http.post(api.comments(listingId), { text });
       onPosted(comment);
       setText('');
     } catch (err) {
@@ -47,14 +47,14 @@ export default function CommentComposer({ listingId, onPosted }) {
   return (
     <form className="composer" onSubmit={handleSubmit} noValidate>
       <label htmlFor="comment-text" className="visually-hidden">
-        Your question
+        Your comment
       </label>
       <textarea
         id="comment-text"
         className={`form-control${problem ? ' is-invalid' : ''}`}
         rows={3}
         maxLength={MAX_LENGTH}
-        placeholder="Ask the seller a question…"
+        placeholder="Write a comment or ask the seller something…"
         value={text}
         onChange={(event) => setText(event.target.value)}
       />
@@ -64,7 +64,7 @@ export default function CommentComposer({ listingId, onPosted }) {
           {text.length} / {MAX_LENGTH}
         </small>
         <button type="submit" className="btn btn-brand rounded-pill px-4" disabled={sending}>
-          {sending ? 'Sending…' : 'Post question'}
+          {sending ? 'Sending…' : 'Post comment'}
         </button>
       </div>
     </form>

@@ -1,0 +1,24 @@
+<% if (member) { %>
+    </main>
+  </div>
+</div>
+<script>
+  // Phones: the ☰ button slides the sidebar in; tapping the dark area closes it
+  (function () {
+    var toggle = document.getElementById('sidebarToggle');
+    var backdrop = document.getElementById('sidebarBackdrop');
+    function setOpen(open) {
+      document.body.classList.toggle('sidebar-open', open);
+      toggle.setAttribute('aria-expanded', String(open));
+    }
+    toggle.addEventListener('click', function () { setOpen(!document.body.classList.contains('sidebar-open')); });
+    backdrop.addEventListener('click', function () { setOpen(false); });
+  })();
+</script>
+<% } else { %>
+  </main>
+</div>
+<% } %>
+<script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

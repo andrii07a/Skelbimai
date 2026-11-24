@@ -1,8 +1,8 @@
-// The ★ / ☆ toggle that adds an ad to the saved list (stored in the database).
-// variant="icon" is the small round button on photos, variant="wide" is the big button on the ad page.
-import { useState } from 'react';
+// The ★ / ☆ toggle that adds a listing to the saved list (stored in the database).
+// variant="icon" is the round button on photos, variant="wide" is the big button on the listing page.
+import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
-import { endpoints, http } from '../../lib/http.js';
+import { api, http } from '../../lib/http.js';
 import { useSession } from '../../context/SessionContext.jsx';
 
 export default function SaveToggle({ listingId, saved, onSavedChange, variant = 'icon' }) {
@@ -10,9 +10,19 @@ export default function SaveToggle({ listingId, saved, onSavedChange, variant = 
   const navigate = useNavigate();
   const location = useLocation();
   const [pending, setPending] = useState(false);
+  const [problem, setProblem] = useState('');
+  const hideTimer = useRef();
+
+  useEffect(() => () => clearTimeout(hideTimer.current), []);
+
+  function showProblem(text) {
+    setProblem(text);
+    clearTimeout(hideTimer.current);
+    hideTimer.current = setTimeout(() => setProblem(''), 3500);
+  }
 
   async function handleClick(event) {
-    event.preventDefault();
+    event.preventDefault(); // the toggle can sit inside a link
     event.stopPropagation();
     if (!member) {
       navigate('/sign-in', { state: { returnTo: location.pathname + location.search } });
@@ -20,31 +30,37 @@ export default function SaveToggle({ listingId, saved, onSavedChange, variant = 
     }
     setPending(true);
     try {
-      const url = endpoints.savedItem(listingId);
-      const result = saved ? await http.remove(url) : await http.post(url);
-      onSavedChange(result.is_favorite);
+      const url = api.savedListing(listingId);
+      const result = saved ? await http.remove(url) : await http.put(url);
+      onSavedChange(result.saved);
     } catch (err) {
-      alert(err.message);
+      showProblem(err.message);
     } finally {
       setPending(false);
     }
   }
 
-  const label = saved ? 'Remove from saved' : 'Save this ad';
-  const star = saved ? '★' : '☆';
+  const label = saved ? 'Remove from saved' : 'Save this listing';
 
   return (
-    <button
-      type="button"
-      className={`save-toggle save-toggle--${variant}${saved ? ' is-saved' : ''}`}
-      onClick={handleClick}
-      disabled={pending}
-      aria-pressed={saved}
-      aria-label={label}
-      title={label}
-    >
-      <span className="save-toggle-star">{star}</span>
-      {variant === 'wide' && <span>{saved ? 'Saved' : 'Save'}</span>}
-    </button>
+    <span className={`save-wrap save-wrap--${variant}`}>
+      <button
+        type="button"
+        className={`save-toggle save-toggle--${variant}${saved ? ' is-saved' : ''}`}
+        onClick={handleClick}
+        disabled={pending}
+        aria-pressed={saved}
+        aria-label={label}
+        title={label}
+      >
+        <span aria-hidden="true">{saved ? '★' : '☆'}</span>
+        {variant === 'wide' && <span>{saved ? 'Saved' : 'Save'}</span>}
+      </button>
+      {problem && (
+        <span className="save-problem" role="alert">
+          {problem}
+        </span>
+      )}
+    </span>
   );
 }

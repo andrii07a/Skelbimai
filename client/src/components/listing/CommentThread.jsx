@@ -4,22 +4,22 @@ import Avatar from '../ui/Avatar.jsx';
 
 export default function CommentThread({ comments, sellerName }) {
   if (comments.length === 0) {
-    return <p className="text-muted">No questions yet. Be the first to ask the seller!</p>;
+    return <p className="text-muted">No comments yet. Be the first to ask the seller something!</p>;
   }
 
   return (
     <ol className="thread">
       {comments.map((comment) => {
-        const bySeller = comment.username === sellerName;
+        const bySeller = comment.author === sellerName;
         return (
           <li key={comment.id} className={`thread-item${bySeller ? ' thread-item--seller' : ''}`}>
-            <Avatar name={comment.username} size={32} />
+            <Avatar name={comment.author} size={32} />
             <div className="thread-bubble">
               <div className="thread-author">
-                {comment.username}
+                {comment.author}
                 {bySeller && <span className="seller-badge">seller</span>}
-                <time dateTime={comment.created_at} title={fullDate(comment.created_at)}>
-                  {timeAgo(comment.created_at)}
+                <time dateTime={comment.postedAt} title={fullDate(comment.postedAt)}>
+                  {timeAgo(comment.postedAt)}
                 </time>
               </div>
               <div className="pre-wrap">{comment.text}</div>

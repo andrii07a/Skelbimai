@@ -1,0 +1,23 @@
+<%- include('../partials/top') %>
+<div class="auth-panel mx-auto">
+  <h1 class="h4 page-title mb-1">Sign in</h1>
+  <p class="text-muted small mb-4">Manage your listings, comments and saved items.</p>
+
+  <% if (problem) { %><div class="alert alert-danger py-2" role="alert"><%= problem %></div><% } %>
+
+  <form method="post" action="/admin/sign-in" novalidate>
+    <input type="hidden" name="back" value="<%= back %>">
+    <div class="mb-3">
+      <label class="form-label" for="login">Username or email</label>
+      <input class="form-control form-control-lg" id="login" name="login" value="<%= login %>" autocomplete="username" required autofocus>
+    </div>
+    <div class="mb-4">
+      <label class="form-label" for="password">Password</label>
+      <input class="form-control form-control-lg" id="password" name="password" type="password" autocomplete="current-password" required>
+    </div>
+    <button class="btn btn-primary btn-lg w-100 rounded-pill">Sign in</button>
+  </form>
+
+  <p class="text-center small mt-4 mb-0">First time here? <a href="/admin/join">Create an account</a></p>
+</div>
+<%- include('../partials/bottom') %>

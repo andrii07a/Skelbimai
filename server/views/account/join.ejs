@@ -1,0 +1,33 @@
+<%- include('../partials/top') %>
+<%
+  const fields = [
+    { name: 'username', label: 'Username', type: 'text', auto: 'username', hint: '3–30 letters, digits or _' },
+    { name: 'email', label: 'Email', type: 'email', auto: 'email' },
+    { name: 'password', label: 'Password', type: 'password', auto: 'new-password', hint: 'At least 6 characters' },
+    { name: 'password2', label: 'Password again', type: 'password', auto: 'new-password' },
+  ];
+%>
+<div class="auth-panel mx-auto">
+  <h1 class="h4 page-title mb-1">Join Turgus</h1>
+  <p class="text-muted small mb-4">Free account: post listings with photos, comment and save what you like.</p>
+
+  <form method="post" action="/admin/join" novalidate>
+    <% for (const f of fields) { const problem = fieldErrors[f.name]; %>
+      <div class="mb-3">
+        <label class="form-label" for="<%= f.name %>"><%= f.label %></label>
+        <input class="form-control<%= problem ? ' is-invalid' : '' %>" id="<%= f.name %>" name="<%= f.name %>"
+               type="<%= f.type %>" autocomplete="<%= f.auto %>"
+               value="<%= f.type === 'password' ? '' : (form[f.name] || '') %>" required>
+        <% if (problem) { %>
+          <div class="invalid-feedback"><%= problem %></div>
+        <% } else if (f.hint) { %>
+          <div class="form-text"><%= f.hint %></div>
+        <% } %>
+      </div>
+    <% } %>
+    <button class="btn btn-primary btn-lg w-100 rounded-pill mt-2">Create my account</button>
+  </form>
+
+  <p class="text-center small mt-4 mb-0">Already a member? <a href="/admin/sign-in">Sign in</a></p>
+</div>
+<%- include('../partials/bottom') %>

@@ -1,0 +1,75 @@
+<%- include('../partials/top') %>
+<%
+  const bad = (field) => (fieldErrors[field] ? ' is-invalid' : '');
+  const problemOf = (field) => fieldErrors[field];
+  const action = listing ? `/admin/listings/${listing.id}` : '/admin/listings';
+%>
+<div class="mb-3">
+  <a class="small" href="/admin/listings">← My listings</a>
+  <h1 class="h3 page-title mt-1 mb-0"><%= title %></h1>
+</div>
+
+<% if (listing && listing.blocked_at) { %>
+  <div class="alert alert-warning">An administrator has hidden this listing, so buyers cannot see it right now.</div>
+<% } %>
+<% if (Object.keys(fieldErrors).length) { %>
+  <div class="alert alert-danger" role="alert">Almost there — please check the highlighted fields.</div>
+<% } %>
+
+<form method="post" action="<%= action %>" enctype="multipart/form-data" novalidate class="form-grid">
+  <div class="card card-body">
+    <div class="mb-3">
+      <label class="form-label fw-semibold" for="title">What are you selling?</label>
+      <input class="form-control form-control-lg<%= bad('title') %>" id="title" name="title"
+             maxlength="<%= limits.titleMax %>" value="<%= form.title || '' %>" placeholder="e.g. Camping tent for 3 people" required>
+      <% if (problemOf('title')) { %><div class="invalid-feedback"><%= problemOf('title') %></div><% } %>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label fw-semibold" for="details">Description</label>
+      <textarea class="form-control<%= bad('details') %>" id="details" name="details" rows="7"
+                maxlength="<%= limits.detailsMax %>" placeholder="Condition, size, what is included, where to pick it up…" required><%= form.details || '' %></textarea>
+      <% if (problemOf('details')) { %><div class="invalid-feedback"><%= problemOf('details') %></div><% } %>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-sm-7">
+        <label class="form-label fw-semibold" for="categoryId">Category</label>
+        <select class="form-select<%= bad('categoryId') %>" id="categoryId" name="categoryId" required>
+          <option value="">Choose…</option>
+          <% for (const c of categories) { %>
+            <option value="<%= c.id %>" <%= String(form.categoryId) === String(c.id) ? 'selected' : '' %>><%= c.title %></option>
+          <% } %>
+        </select>
+        <% if (problemOf('categoryId')) { %><div class="invalid-feedback"><%= problemOf('categoryId') %></div><% } %>
+      </div>
+      <div class="col-sm-5">
+        <label class="form-label fw-semibold" for="price">Price</label>
+        <div class="input-group has-validation">
+          <input class="form-control<%= bad('price') %>" id="price" name="price" inputmode="decimal"
+                 value="<%= form.price ?? '' %>" placeholder="0.00" required>
+          <span class="input-group-text">€</span>
+          <% if (problemOf('price')) { %><div class="invalid-feedback"><%= problemOf('price') %></div><% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card card-body">
+    <label class="form-label fw-semibold" for="photo">Photo</label>
+    <% if (listing) { %>
+      <img src="/uploads/<%= listing.photo %>" alt="Current photo" class="photo-preview mb-2">
+      <div class="form-text mb-2">Choose a new file only if you want to replace this photo.</div>
+    <% } %>
+    <input class="form-control<%= bad('photo') %>" id="photo" name="photo" type="file"
+           accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif" <%= listing ? '' : 'required' %>>
+    <% if (problemOf('photo')) { %><div class="invalid-feedback"><%= problemOf('photo') %></div><% } %>
+    <div class="form-text">JPG, PNG, WEBP or GIF, max <%= maxMb %> MB.</div>
+
+    <div class="d-grid gap-2 mt-4">
+      <button class="btn btn-primary btn-lg rounded-pill"><%= listing ? 'Save changes' : 'Publish listing' %></button>
+      <a class="btn btn-link" href="/admin/listings">Cancel</a>
+    </div>
+  </div>
+</form>
+<%- include('../partials/bottom') %>

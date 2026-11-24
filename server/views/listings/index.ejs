@@ -1,0 +1,48 @@
+<%- include('../partials/top') %>
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+  <div>
+    <h1 class="h3 page-title mb-0">My listings</h1>
+    <span class="text-muted small"><%= rows.length %> in total</span>
+  </div>
+  <a class="btn btn-primary rounded-pill px-4" href="/admin/listings/new">+ New listing</a>
+</div>
+
+<% if (rows.length === 0) { %>
+  <div class="card card-body text-center py-5">
+    <div class="display-6" aria-hidden="true">📦</div>
+    <p class="mb-2">You have not posted anything yet.</p>
+    <div><a class="btn btn-primary rounded-pill" href="/admin/listings/new">Post your first listing</a></div>
+  </div>
+<% } else { %>
+  <div class="listing-cards">
+    <% for (const row of rows) { %>
+      <article class="listing-card<%= row.blocked_at ? ' is-blocked' : '' %>">
+        <img src="/uploads/<%= row.photo %>" alt="" class="listing-card-photo">
+        <div class="listing-card-body">
+          <div class="d-flex justify-content-between gap-2">
+            <a class="listing-card-title" href="/item/<%= row.id %>" target="_blank"><%= row.title %></a>
+            <strong class="text-nowrap"><%= euro(row.price_cents) %> €</strong>
+          </div>
+          <div class="small text-muted mb-2">
+            <%= row.category_title %> · posted <%= row.posted_at.slice(0, 10) %>
+            <% if (row.edited_at) { %>· edited <%= row.edited_at.slice(0, 10) %><% } %>
+          </div>
+          <% if (row.blocked_at) { %>
+            <div class="status-pill status-pill--hidden">Hidden by an administrator</div>
+          <% } else { %>
+            <div class="status-pill">Live on the marketplace</div>
+          <% } %>
+          <div class="listing-card-actions">
+            <a class="btn btn-sm btn-light" href="/admin/listings/<%= row.id %>/comments">💬 Comments (<%= row.comments_total %>)</a>
+            <a class="btn btn-sm btn-outline-primary" href="/admin/listings/<%= row.id %>/edit">Edit</a>
+            <form method="post" action="/admin/listings/<%= row.id %>/delete" class="d-inline"
+                  onsubmit="return confirm('Delete this listing for good?')">
+              <button class="btn btn-sm btn-outline-danger">Delete</button>
+            </form>
+          </div>
+        </div>
+      </article>
+    <% } %>
+  </div>
+<% } %>
+<%- include('../partials/bottom') %>

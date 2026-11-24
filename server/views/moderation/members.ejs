@@ -1,0 +1,30 @@
+<%- include('../partials/top') %>
+<h1 class="h3 page-title mb-1">Members</h1>
+<p class="text-muted">A suspended member is signed out, cannot sign in again, and their listings and comments disappear from the marketplace.</p>
+
+<div class="member-grid">
+  <% for (const p of people) { const me = p.id === member.id; %>
+    <div class="member-card<%= p.blocked_at ? ' is-blocked' : '' %>">
+      <div class="d-flex align-items-center gap-2 mb-2">
+        <span class="avatar"><%= p.username.charAt(0).toUpperCase() %></span>
+        <div class="min-w-0">
+          <div class="fw-bold text-truncate"><%= p.username %><% if (me) { %> <span class="text-muted fw-normal">(you)</span><% } %></div>
+          <div class="small text-muted text-truncate"><%= p.email %></div>
+        </div>
+      </div>
+      <div class="small mb-3">
+        <span class="status-pill<%= p.role === 'admin' ? ' status-pill--admin' : '' %>"><%= p.role === 'admin' ? 'Administrator' : 'Member' %></span>
+        <% if (p.blocked_at) { %><span class="status-pill status-pill--hidden">Suspended <%= p.blocked_at.slice(0, 10) %></span><% } %>
+        <span class="text-muted ms-1"><%= p.listings_total %> listing<%= p.listings_total === 1 ? '' : 's' %> · joined <%= p.joined_at.slice(0, 10) %></span>
+      </div>
+      <% if (!me) { %>
+        <form method="post" action="/admin/members/<%= p.id %>/suspend" class="m-0">
+          <button class="btn btn-sm w-100 rounded-pill <%= p.blocked_at ? 'btn-primary' : 'btn-outline-danger' %>">
+            <%= p.blocked_at ? 'Lift suspension' : 'Suspend' %>
+          </button>
+        </form>
+      <% } %>
+    </div>
+  <% } %>
+</div>
+<%- include('../partials/bottom') %>

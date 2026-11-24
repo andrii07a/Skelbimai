@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { endpoints, http } from '../lib/http.js';
+import { api, http } from '../lib/http.js';
 
 // Loads ads for the given filters. An old request is cancelled when the filters change.
 export function useListings({ category, q, sort }) {
@@ -16,7 +16,7 @@ export function useListings({ category, q, sort }) {
 
     setStatus('loading');
     http
-      .get(endpoints.listings(filters), controller.signal)
+      .get(api.listings(filters), controller.signal)
       .then((data) => {
         setListings(data);
         setStatus('ready');

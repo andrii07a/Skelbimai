@@ -18,7 +18,7 @@ const SIGN_IN_FIELDS = [
 export default function AuthPage({ mode }) {
   const isJoin = mode === 'join';
   const fields = isJoin ? JOIN_FIELDS : SIGN_IN_FIELDS;
-  const { member, signIn, signUp } = useSession();
+  const { member, signIn, join } = useSession();
   const navigate = useNavigate();
   const location = useLocation();
   const returnTo = location.state?.returnTo || '/';
@@ -36,12 +36,12 @@ export default function AuthPage({ mode }) {
     setFieldErrors({});
     setBusy(true);
     try {
-      if (isJoin) await signUp(form);
+      if (isJoin) await join(form);
       else await signIn(form.login ?? '', form.password ?? '');
       navigate(returnTo, { replace: true });
     } catch (err) {
-      setFieldErrors(err.fields || {});
-      if (!err.fields || Object.keys(err.fields).length === 0) setProblem(err.message);
+      setFieldErrors(err.fieldErrors || {});
+      if (!err.fieldErrors || Object.keys(err.fieldErrors).length === 0) setProblem(err.message);
       setBusy(false);
     }
   }
@@ -54,7 +54,7 @@ export default function AuthPage({ mode }) {
           <h1 className="h3 mt-3">{isJoin ? 'Join Turgus' : 'Welcome back'}</h1>
           <p className="mb-0">
             {isJoin
-              ? 'Post ads with photos, ask sellers questions and save the things you like.'
+              ? 'Post ads with photos, comment on listings and save the things you like.'
               : 'Sign in to comment, save ads and manage your own listings.'}
           </p>
         </div>

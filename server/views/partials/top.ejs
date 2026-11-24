@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= title %> · Turgus account</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧺</text></svg>">
+  <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/admin-assets/admin.css">
+</head>
+<%
+  // Menu item is active on its page and its sub-pages (/admin/listings/4/edit → "My listings")
+  const activeFor = (href) =>
+    here === href || (href !== '/admin' && href !== '/admin/listings/new' && here !== '/admin/listings/new' && here.startsWith(href + '/'));
+  const menuItem = (href, icon, label) =>
+    `<a class="side-link${activeFor(href) ? ' is-active' : ''}" href="${href}"><span class="side-icon" aria-hidden="true">${icon}</span>${label}</a>`;
+  const isAdmin = member && member.role === 'admin';
+%>
+<% if (member) { %>
+<body class="with-sidebar">
+<div class="shell">
+  <aside class="sidebar" id="sidebar">
+    <a class="side-brand" href="/admin"><span class="brand-mark">T</span><span>Turgus <small>account</small></span></a>
+
+    <nav class="side-nav" aria-label="Account menu">
+      <div class="side-section">Selling &amp; buying</div>
+      <%- menuItem('/admin', '◧', 'Overview') %>
+      <%- menuItem('/admin/listings', '▤', 'My listings') %>
+      <%- menuItem('/admin/listings/new', '＋', 'New listing') %>
+      <%- menuItem('/admin/saved', '★', 'Saved') %>
+      <% if (isAdmin) { %>
+        <div class="side-section">Administration</div>
+        <%- menuItem('/admin/categories', '#', 'Categories') %>
+        <%- menuItem('/admin/members', '☺', 'Members') %>
+        <%- menuItem('/admin/moderation/listings', '⚑', 'Review listings') %>
+        <%- menuItem('/admin/moderation/comments', '✉', 'Review comments') %>
+      <% } %>
+    </nav>
+
+    <div class="side-footer">
+      <div class="side-user">
+        <span class="avatar"><%= member.username.charAt(0).toUpperCase() %></span>
+        <div>
+          <div class="fw-semibold"><%= member.username %></div>
+          <div class="small opacity-75"><%= isAdmin ? 'Administrator' : 'Member' %></div>
+        </div>
+      </div>
+      <a class="side-link" href="/"><span class="side-icon" aria-hidden="true">↗</span>Open marketplace</a>
+      <form method="post" action="/admin/sign-out" class="m-0">
+        <button class="side-link side-link--button"><span class="side-icon" aria-hidden="true">⏻</span>Sign out</button>
+      </form>
+    </div>
+  </aside>
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <div class="workspace">
+    <header class="topbar">
+      <button class="topbar-menu" type="button" id="sidebarToggle" aria-controls="sidebar" aria-expanded="false">☰<span class="visually-hidden">Menu</span></button>
+      <span class="topbar-title"><%= title %></span>
+      <a class="btn btn-accent btn-sm rounded-pill ms-auto" href="/admin/listings/new">+ New listing</a>
+    </header>
+    <main class="workspace-body">
+<% } else { %>
+<body class="guest">
+<div class="guest-shell">
+  <a class="guest-brand" href="/"><span class="brand-mark">T</span> Turgus</a>
+  <main class="guest-main">
+<% } %>
+  <% if (notice) { %>
+    <div class="alert alert-<%= notice.tone %> alert-dismissible fade show" role="status">
+      <%= notice.text %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% } %>

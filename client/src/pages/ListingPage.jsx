@@ -1,7 +1,7 @@
-// One ad: big photo, description, seller card with the ★ button, and the questions thread.
+// One ad: big photo, description, seller card with the ★ button, and the comments.
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router';
-import { endpoints, http, photoUrl } from '../lib/http.js';
+import { api, http } from '../lib/http.js';
 import { fullDate, money, timeAgo } from '../lib/format.js';
 import { useSession } from '../context/SessionContext.jsx';
 import SaveToggle from '../components/listing/SaveToggle.jsx';
@@ -22,7 +22,7 @@ export default function ListingPage() {
     setListing(null);
     setProblem('');
     http
-      .get(endpoints.listing(id), controller.signal)
+      .get(api.listing(id), controller.signal)
       .then(setListing)
       .catch((err) => err.name !== 'AbortError' && setProblem(err.message));
     return () => controller.abort();
@@ -40,7 +40,7 @@ export default function ListingPage() {
   }
   if (!listing) return <Loader />;
 
-  const isMine = member?.username === listing.owner;
+  const isMine = member?.username === listing.seller;
 
   return (
     <div className="container py-4">
@@ -50,7 +50,7 @@ export default function ListingPage() {
             <Link to="/">Browse</Link>
           </li>
           <li className="breadcrumb-item">
-            <Link to={`/?category=${listing.category_id}`}>{listing.category_name}</Link>
+            <Link to={`/?category=${listing.category.id}`}>{listing.category.title}</Link>
           </li>
           <li className="breadcrumb-item active text-truncate" aria-current="page">
             {listing.title}
@@ -59,17 +59,17 @@ export default function ListingPage() {
       </nav>
 
       <div className="listing-layout">
-        <img className="listing-photo" src={photoUrl(listing.image)} alt={listing.title} />
+        <img className="listing-photo" src={listing.photoUrl} alt={listing.title} />
 
         <div className="listing-details">
           <section className="panel">
             <h2 className="panel-heading">Description</h2>
-            <p className="pre-wrap mb-0">{listing.description}</p>
+            <p className="pre-wrap mb-0">{listing.details}</p>
           </section>
 
           <section className="panel mt-3">
-            <h2 className="panel-heading">Questions ({listing.comments.length})</h2>
-            <CommentThread comments={listing.comments} sellerName={listing.owner} />
+            <h2 className="panel-heading">Comments ({listing.comments.length})</h2>
+            <CommentThread comments={listing.comments} sellerName={listing.seller} />
             <CommentComposer
               listingId={listing.id}
               onPosted={(comment) => setListing({ ...listing, comments: [...listing.comments, comment] })}
@@ -81,28 +81,28 @@ export default function ListingPage() {
           <div className="panel">
             <h1 className="listing-title">{listing.title}</h1>
             <div className="listing-price">{money(listing.price)}</div>
-            <div className="text-muted small mb-3" title={fullDate(listing.created_at)}>
-              Posted {timeAgo(listing.created_at)} in {listing.category_name}
+            <div className="text-muted small mb-3" title={fullDate(listing.postedAt)}>
+              Posted {timeAgo(listing.postedAt)} in {listing.category.title}
             </div>
             <SaveToggle
               variant="wide"
               listingId={listing.id}
-              saved={listing.is_favorite}
-              onSavedChange={(saved) => setListing({ ...listing, is_favorite: saved })}
+              saved={listing.saved}
+              onSavedChange={(saved) => setListing({ ...listing, saved })}
             />
           </div>
 
           <div className="panel mt-3 d-flex align-items-center gap-3">
-            <Avatar name={listing.owner} size={48} />
+            <Avatar name={listing.seller} size={48} />
             <div>
               <div className="small text-muted">Seller</div>
-              <div className="fw-semibold">{listing.owner}</div>
+              <div className="fw-semibold">{listing.seller}</div>
             </div>
           </div>
 
           {isMine && (
-            <a href={`/admin/ads/${listing.id}/edit`} className="btn btn-outline-brand w-100 mt-3 rounded-pill">
-              ✎ Edit my ad
+            <a href={`/admin/listings/${listing.id}/edit`} className="btn btn-outline-brand w-100 mt-3 rounded-pill">
+              ✎ Edit my listing
             </a>
           )}
         </aside>

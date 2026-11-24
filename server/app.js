@@ -1,10 +1,11 @@
 // Main Express application: admin area (EJS), REST API and the built React site, all on one port.
+const fs = require('node:fs');
 const path = require('node:path');
 const express = require('express');
 const session = require('express-session');
 
 require('./db/database'); // creates tables + demo data on first start
-const { UPLOAD_DIR } = require('./paths');
+const { UPLOAD_DIR, CLIENT_DIST } = require('./paths');
 const { loadUser, requireLogin } = require('./middleware/auth');
 const flash = require('./middleware/flash');
 const adminAuthRoutes = require('./routes/adminAuth');
@@ -53,13 +54,23 @@ app.use('/admin', adminDashboardRoutes);
 app.use('/admin', adminAdsRoutes); // my ads, comments under them, saved ads
 app.use('/admin', adminModerationRoutes); // admin only: categories, users, blocking
 
-app.get('/', (req, res) => {
-  res.send('Classifieds server is running. Admin area: <a href="/admin">/admin</a>');
-});
-
 // 404 for admin pages
 app.use('/admin', (req, res) => {
   res.status(404).render('error', { title: 'Page not found', message: 'This admin page does not exist.' });
+});
+
+// Public React site (built into client/dist by "npm run setup")
+const clientIndex = path.join(CLIENT_DIST, 'index.html');
+app.use(express.static(CLIENT_DIST));
+app.use((req, res, next) => {
+  if (req.method !== 'GET' || req.path.startsWith('/uploads/')) return next();
+  // Every other address (/, /ads/5, /favorites...) is handled by React Router
+  if (!fs.existsSync(clientIndex)) {
+    return res
+      .status(503)
+      .send('The React site is not built yet. Run <code>npm run setup</code> in the project folder. Admin area: <a href="/admin">/admin</a>');
+  }
+  res.sendFile(clientIndex);
 });
 
 // Error handler: JSON for the API, a page for the admin area

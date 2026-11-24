@@ -11,6 +11,7 @@ const adminAuthRoutes = require('./routes/adminAuth');
 const adminDashboardRoutes = require('./routes/adminDashboard');
 const adminAdsRoutes = require('./routes/adminAds');
 const adminModerationRoutes = require('./routes/adminModeration');
+const apiRoutes = require('./routes/api');
 
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -40,6 +41,9 @@ app.use(loadUser);
 // Static files: uploaded photos and Bootstrap for the admin pages
 app.use('/uploads', express.static(UPLOAD_DIR));
 app.use('/vendor/bootstrap', express.static(path.join(__dirname, 'node_modules', 'bootstrap', 'dist')));
+
+// REST API for the React site
+app.use('/api', apiRoutes);
 
 // Admin area
 app.use('/admin', flash);

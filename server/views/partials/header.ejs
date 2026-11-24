@@ -3,58 +3,73 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title><%= title %> · Classifieds admin</title>
+  <title><%= title %> · Turgus account</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧺</text></svg>">
   <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css">
-  <style>
-    body { background: #f5f6f8; }
-    .ad-thumb { width: 72px; height: 54px; object-fit: cover; border-radius: .375rem; background: #e9ecef; }
-    .table td { vertical-align: middle; }
-  </style>
+  <link rel="stylesheet" href="/admin-assets/admin.css">
 </head>
-<body>
 <%
-  const navLink = (href, label) =>
-    `<li class="nav-item"><a class="nav-link${currentPath === href ? ' active' : ''}" href="${href}">${label}</a></li>`;
+  // A menu item is active on its own page and on its sub-pages (e.g. /admin/ads/5/edit -> "My ads")
+  const isActive = (href) =>
+    currentPath === href ||
+    (href !== '/admin' && href !== '/admin/ads/new' && currentPath.startsWith(href + '/') && currentPath !== '/admin/ads/new');
+  const sideLink = (href, icon, label) =>
+    `<a class="side-link${isActive(href) ? ' is-active' : ''}" href="${href}"><span class="side-icon" aria-hidden="true">${icon}</span>${label}</a>`;
 %>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-  <div class="container">
-    <a class="navbar-brand" href="/admin">Classifieds <span class="badge text-bg-warning">admin</span></a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNav"
-            aria-controls="adminNav" aria-expanded="false" aria-label="Menu">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="adminNav">
-      <% if (currentUser) { %>
-        <ul class="navbar-nav me-auto">
-          <%- navLink('/admin/ads', 'My ads') %>
-          <%- navLink('/admin/ads/new', '+ New ad') %>
-          <%- navLink('/admin/favorites', '⭐ Saved') %>
-          <% if (currentUser.role === 'admin') { %>
-            <li class="nav-item d-none d-lg-block"><span class="nav-link disabled">|</span></li>
-            <%- navLink('/admin/categories', 'Categories') %>
-            <%- navLink('/admin/users', 'Users') %>
-            <%- navLink('/admin/moderation/ads', 'All ads') %>
-            <%- navLink('/admin/moderation/comments', 'All comments') %>
-          <% } %>
-        </ul>
-        <div class="d-flex flex-wrap align-items-center gap-2">
-          <a class="btn btn-sm btn-outline-light" href="/">Public site ↗</a>
-          <span class="text-light small">
-            <%= currentUser.username %>
-            <% if (currentUser.role === 'admin') { %><span class="badge text-bg-warning">admin</span><% } %>
-          </span>
-          <form method="post" action="/admin/logout" class="m-0">
-            <button class="btn btn-sm btn-light">Log out</button>
-          </form>
-        </div>
-      <% } else { %>
-        <ul class="navbar-nav me-auto"></ul>
-        <a class="btn btn-sm btn-outline-light" href="/">Public site ↗</a>
+<% if (currentUser) { %>
+<body class="with-sidebar">
+<div class="shell">
+  <aside class="sidebar" id="sidebar">
+    <a class="side-brand" href="/admin">
+      <span class="brand-mark">T</span>
+      <span>Turgus <small>account</small></span>
+    </a>
+
+    <nav class="side-nav" aria-label="Account menu">
+      <div class="side-section">My account</div>
+      <%- sideLink('/admin', '◧', 'Overview') %>
+      <%- sideLink('/admin/ads', '▤', 'My ads') %>
+      <%- sideLink('/admin/ads/new', '＋', 'New ad') %>
+      <%- sideLink('/admin/favorites', '★', 'Saved ads') %>
+
+      <% if (currentUser.role === 'admin') { %>
+        <div class="side-section">Administration</div>
+        <%- sideLink('/admin/categories', '#', 'Categories') %>
+        <%- sideLink('/admin/users', '☺', 'Users') %>
+        <%- sideLink('/admin/moderation/ads', '⚑', 'Moderate ads') %>
+        <%- sideLink('/admin/moderation/comments', '✉', 'Moderate comments') %>
       <% } %>
+    </nav>
+
+    <div class="side-footer">
+      <div class="side-user">
+        <span class="avatar"><%= currentUser.username.charAt(0).toUpperCase() %></span>
+        <div>
+          <div class="fw-semibold"><%= currentUser.username %></div>
+          <div class="small opacity-75"><%= currentUser.role === 'admin' ? 'Administrator' : 'Member' %></div>
+        </div>
+      </div>
+      <a class="side-link" href="/"><span class="side-icon" aria-hidden="true">↗</span>Open marketplace</a>
+      <form method="post" action="/admin/logout" class="m-0">
+        <button class="side-link side-link--button"><span class="side-icon" aria-hidden="true">⏻</span>Sign out</button>
+      </form>
     </div>
-  </div>
-</nav>
-<main class="container pb-5">
+  </aside>
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <div class="workspace">
+    <header class="topbar">
+      <button class="topbar-menu" type="button" id="sidebarToggle" aria-controls="sidebar" aria-expanded="false">☰<span class="visually-hidden">Menu</span></button>
+      <span class="topbar-title"><%= title %></span>
+      <a class="btn btn-accent btn-sm rounded-pill ms-auto" href="/admin/ads/new">+ New ad</a>
+    </header>
+    <main class="workspace-body">
+<% } else { %>
+<body class="guest">
+<div class="guest-shell">
+  <a class="guest-brand" href="/"><span class="brand-mark">T</span> Turgus</a>
+  <main class="guest-main">
+<% } %>
   <% if (flash) { %>
     <div class="alert alert-<%= flash.type === 'error' ? 'danger' : flash.type %> alert-dismissible fade show" role="alert">
       <%= flash.message %>

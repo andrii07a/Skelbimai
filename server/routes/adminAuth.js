@@ -12,14 +12,14 @@ function safeNext(next) {
 
 router.get('/login', (req, res) => {
   if (req.user) return res.redirect('/admin');
-  res.render('login', { title: 'Log in', values: {}, error: null, next: safeNext(req.query.next) });
+  res.render('login', { title: 'Sign in', values: {}, error: null, next: safeNext(req.query.next) });
 });
 
 router.post('/login', async (req, res) => {
   const result = await auth.login(req.body);
   if (result.error) {
     return res.status(400).render('login', {
-      title: 'Log in',
+      title: 'Sign in',
       values: { login: req.body.login },
       error: result.error,
       next: safeNext(req.body.next),
@@ -32,14 +32,14 @@ router.post('/login', async (req, res) => {
 
 router.get('/register', (req, res) => {
   if (req.user) return res.redirect('/admin');
-  res.render('register', { title: 'Register', values: {}, errors: {} });
+  res.render('register', { title: 'Create an account', values: {}, errors: {} });
 });
 
 router.post('/register', async (req, res) => {
   const result = await auth.register(req.body);
   if (result.errors) {
     return res.status(400).render('register', {
-      title: 'Register',
+      title: 'Create an account',
       values: { username: req.body.username, email: req.body.email },
       errors: result.errors,
     });

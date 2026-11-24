@@ -38,6 +38,10 @@ body {
   white-space: pre-wrap;
 }
 
+.form-control,
+.form-select {
+  background-color: #fff;
+}
 .form-control:focus,
 .form-select:focus {
   border-color: var(--brand);

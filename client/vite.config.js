@@ -15,6 +15,7 @@ export default defineConfig({
       '/uploads': SERVER,
       '/admin': SERVER,
       '/vendor': SERVER,
+      '/admin-assets': SERVER,
     },
   },
 });

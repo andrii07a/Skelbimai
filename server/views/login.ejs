@@ -3,7 +3,7 @@
   <div class="col-sm-10 col-md-6 col-lg-4">
     <div class="card shadow-sm">
       <div class="card-body p-4">
-        <h1 class="h4 mb-3">Log in to the admin area</h1>
+        <h1 class="h4 mb-3">Sign in to your account</h1>
         <% if (error) { %><div class="alert alert-danger py-2"><%= error %></div><% } %>
         <form method="post" action="/admin/login" novalidate>
           <input type="hidden" name="next" value="<%= next %>">
@@ -15,9 +15,9 @@
             <label class="form-label" for="password">Password</label>
             <input class="form-control" id="password" name="password" type="password" required>
           </div>
-          <button class="btn btn-primary w-100">Log in</button>
+          <button class="btn btn-primary w-100">Sign in</button>
         </form>
-        <p class="text-center small mt-3 mb-0">No account? <a href="/admin/register">Register</a></p>
+        <p class="text-center small mt-3 mb-0">New to Turgus? <a href="/admin/register">Create an account</a></p>
       </div>
     </div>
   </div>

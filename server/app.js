@@ -42,6 +42,7 @@ app.use(loadUser);
 // Static files: uploaded photos and Bootstrap for the admin pages
 app.use('/uploads', express.static(UPLOAD_DIR));
 app.use('/vendor/bootstrap', express.static(path.join(__dirname, 'node_modules', 'bootstrap', 'dist')));
+app.use('/admin-assets', express.static(path.join(__dirname, 'public')));
 
 // REST API for the React site
 app.use('/api', apiRoutes);

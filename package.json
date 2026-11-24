@@ -1,8 +1,8 @@
 {
-  "name": "classifieds-app",
+  "name": "turgus",
   "version": "1.0.0",
   "private": true,
-  "description": "Posting / Classifieds application: Node.js + Express admin area, React SPA public area, SQLite database",
+  "description": "Turgus: posting / classifieds application: Node.js + Express admin area, React SPA public area, SQLite database",
   "engines": {
     "node": ">=22.13.0"
   },

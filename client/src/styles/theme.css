@@ -284,11 +284,15 @@ body {
 /* ---------- Browse layout ---------- */
 .browse-layout {
   display: grid;
+  grid-template-columns: minmax(0, 1fr); /* the chip row must scroll, not widen the page */
   gap: 1.5rem;
+}
+.browse-layout > * {
+  min-width: 0;
 }
 @media (min-width: 992px) {
   .browse-layout {
-    grid-template-columns: 240px 1fr;
+    grid-template-columns: 240px minmax(0, 1fr);
     align-items: start;
   }
   .browse-sidebar {

@@ -59,19 +59,23 @@ const FAVORITES = [
   { user: 'ona', ad: 1 },
 ];
 
-// Creates a simple colourful picture (SVG) for a demo ad.
-function makeImage(fileName, title, icon, [color1, color2]) {
-  const safeTitle = title.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+// Draws a square "sticker" picture (SVG) for a demo ad: dotted pastel background,
+// a tilted white card with the item's emoji and a coloured shadow. No extra files needed.
+function makeImage(fileName, icon, [mainColor, secondColor]) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800">
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="${color1}"/>
-      <stop offset="1" stop-color="${color2}"/>
-    </linearGradient>
+    <pattern id="dots" width="40" height="40" patternUnits="userSpaceOnUse">
+      <circle cx="20" cy="20" r="4" fill="${mainColor}" fill-opacity="0.22"/>
+    </pattern>
   </defs>
-  <rect width="800" height="600" fill="url(#g)"/>
-  <text x="400" y="300" font-size="200" text-anchor="middle" dominant-baseline="middle">${icon}</text>
-  <text x="400" y="520" font-size="36" font-family="Arial, sans-serif" fill="#ffffff" text-anchor="middle">${safeTitle}</text>
+  <rect width="800" height="800" fill="#fbf8f2"/>
+  <rect width="800" height="800" fill="${secondColor}" fill-opacity="0.18"/>
+  <rect width="800" height="800" fill="url(#dots)"/>
+  <g transform="rotate(-7 400 400)">
+    <rect x="200" y="215" width="400" height="400" rx="64" fill="${mainColor}" fill-opacity="0.85"/>
+    <rect x="185" y="185" width="400" height="400" rx="64" fill="#ffffff"/>
+    <text x="385" y="395" font-size="230" text-anchor="middle" dominant-baseline="central">${icon}</text>
+  </g>
 </svg>`;
   fs.writeFileSync(path.join(UPLOAD_DIR, fileName), svg);
   return fileName;
@@ -102,7 +106,7 @@ module.exports = function seed(db) {
        VALUES (?, ?, ?, ?, ?, ?, ?)`
     );
     ADS.forEach((ad, i) => {
-      const image = makeImage(`demo-${i + 1}.svg`, ad.title, ad.icon, ad.colors);
+      const image = makeImage(`sample-${i + 1}.svg`, ad.icon, ad.colors);
       const result = insertAd.run(
         ad.title, ad.description, ad.price, image,
         categoryIds[ad.category], userIds[ad.owner], ad.blocked ? 1 : 0

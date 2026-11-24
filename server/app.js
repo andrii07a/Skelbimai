@@ -89,6 +89,6 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Classifieds app: http://localhost:${PORT}`);
-  console.log(`Admin area:      http://localhost:${PORT}/admin`);
+  console.log(`Turgus marketplace: http://localhost:${PORT}`);
+  console.log(`Account / admin:    http://localhost:${PORT}/admin`);
 });
